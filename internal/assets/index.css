@@ -138,8 +138,13 @@ code {
 .hero {
   position: relative;
   isolation: isolate;
+  /* Above the sections below, so the search results panel overlays the cards:
+     their rise animation leaves an identity transform, which is enough to
+     promote them into the positioned paint layer. Stays under the header (30). */
+  z-index: 20;
   padding: 2.25rem 0 3.75rem;
-  overflow: hidden;
+  /* No overflow clipping here: both ::before and ::after are inset:0 so they
+     cannot escape the box, and clipping would cut off the search results. */
   background:
     radial-gradient(90rem 28rem at 12% -10%, var(--off-white), transparent 58%),
     var(--beige);
@@ -166,7 +171,7 @@ code {
   mask-image: linear-gradient(180deg, #000 40%, transparent 92%);
   pointer-events: none;
 }
-.hero-copy, .search { max-width: 42rem; }
+.hero-copy, .search-wrap { max-width: 42rem; }
 .banner {
   display: flex;
   align-items: center;
@@ -243,6 +248,99 @@ code {
   border: 1px solid var(--line);
   border-radius: 0.4rem;
   padding: 0.28rem 0.4rem;
+}
+
+/* Search results listbox */
+.search-wrap { position: relative; }
+
+.search-results {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  right: 0;
+  max-height: min(28rem, 60vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--off-white);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  padding: 0.4rem;
+  text-align: left;
+}
+
+.search-hit {
+  display: block;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.7rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.search-hit + .search-hit { border-top: 1px solid var(--line); }
+.search-hit:hover,
+.search-hit.is-active,
+.search-hit:focus-visible {
+  background: var(--beige);
+  outline: none;
+}
+
+.search-crumb {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  /* Long page titles stay on one line rather than pushing the title down. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-hit-title {
+  display: block;
+  margin-top: 0.15rem;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.search-snippet {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.search-results mark {
+  background: color-mix(in srgb, var(--red-bright) 18%, transparent);
+  color: inherit;
+  border-radius: 0.15rem;
+  padding: 0 0.1em;
+}
+
+.search-note {
+  margin: 0;
+  padding: 0.85rem;
+  color: var(--muted);
+}
+
+.search-foot {
+  margin: 0.25rem 0 0;
+  padding: 0.5rem 0.85rem 0.35rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+/* Announced to screen readers; the panel itself carries the visible result. */
+.search-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Documentation cards */
@@ -336,12 +434,6 @@ code {
 .card-live { border-color: color-mix(in srgb, var(--red) 35%, var(--line)); }
 .empty { color: var(--muted); margin: 0; }
 
-/* Resources strip (HERE-style 3 cards) */
-.resources {
-  background: var(--beige);
-  padding: 0 0 3.5rem;
-}
-.resources .card { background: var(--off-white); }
 
 /* What's new */
 .whats-new {

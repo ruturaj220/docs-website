@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Maitree:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/home/index.css?v=footer2">
+<link rel="stylesheet" href="/assets/home/index.css?v=search1">
 </head>
 <body>
 <a class="skip" href="#documentation">Skip to documentation</a>
@@ -49,114 +49,48 @@
       <h1>Mojro documentation</h1>
       <p class="lede">Find answers to your product and technical questions.</p>
     </div>
-    <label class="search" for="q">
-      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
-        <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-      </svg>
-      <input id="q" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
-      <kbd id="search-kbd">⌘ K</kbd>
-    </label>
+    <div class="search-wrap">
+      <label class="search" for="q">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input id="q" type="search" placeholder="Search the documentation" autocomplete="off" spellcheck="false">
+        <kbd id="search-kbd">⌘ K</kbd>
+      </label>
+      <div class="search-results" id="search-results" role="listbox" aria-label="Search results" hidden></div>
+    </div>
+    <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
   </div>
 </section>
 
 <main id="documentation" class="docs">
   <div class="wrap">
     <h2>Documentation</h2>
+    {{- if .Services }}
     <div class="card-grid" id="card-grid">
-      {{- if .Service }}
-      <!-- Live service — See all opens /{{ .Service.Service }}/{{ .Service.DefaultName }}/ -->
-      <article class="card card-live" data-card data-q="{{ .Service.Search }}">
-        <p class="card-eyebrow">Live service</p>
-        <h3><a href="{{ .Service.DefaultHref }}">{{ .Service.DisplayName }}</a></h3>
-        <p>{{ .Service.Description }}</p>
+      {{- range .Services }}
+      <article class="card card-live">
+        <p class="card-eyebrow">{{ .VersionLabel }}</p>
+        <h3><a href="{{ .DefaultHref }}">{{ .DisplayName }}</a></h3>
+        <p>{{ .Description }}</p>
         <div class="pills">
-          {{- range .Service.Protected }}
+          {{- range .Protected }}
           <a class="pill pill-stable" href="{{ .Href }}">{{ .Name }}</a>
           {{- end }}
-          {{- range .Service.Recent }}
+          {{- range .Recent }}
           <a class="pill" href="{{ .Href }}">{{ .Name }}</a>
           {{- end }}
         </div>
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        <a class="see-all" href="{{ .SeeAllHref }}">See all <span aria-hidden="true">&#8594;</span></a>
       </article>
       {{- end }}
-      <article class="card" data-card data-q="planning optimization planwyse route schedule load">
-        <h3>Planning &amp; optimization</h3>
-        <p>Build executable plans that resolve route, schedule, load, weight, and time together.</p>
-        <div class="pills">
-          <span class="pill">PlanWyse API</span>
-          <span class="pill">Constraints</span>
-          <span class="pill">What-if planning</span>
-          <span class="pill">Fleet capacity</span>
-        </div>
-        {{- if .Service }}
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
-        {{- end }}
-      </article>
-      <article class="card" data-card data-q="execution tracking epod visibility executewyse">
-        <h3>Execution &amp; visibility</h3>
-        <p>Track dispatches, capture ePOD, and feed execution signals back into the next plan.</p>
-        <div class="pills">
-          <span class="pill">ExecuteWyse API</span>
-          <span class="pill">Live ETA</span>
-          <span class="pill">ePOD</span>
-          <span class="pill">Exceptions</span>
-        </div>
-        {{- if .Service }}
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
-        {{- end }}
-      </article>
     </div>
-    <p class="empty" id="no-results" hidden>No topics match that search.</p>
+    {{- else }}
+    <p class="empty">No services published yet. Push to a service repo&#39;s <code>docs/</code> folder and it appears here automatically.</p>
+    {{- end }}
   </div>
 </main>
-
-<section class="resources">
-  <div class="wrap">
-    <div class="card-grid">
-      <article class="card">
-        <h3>Development enablers</h3>
-        <p>SDKs, samples, and tools that help you integrate Mojro APIs faster.</p>
-        <div class="pills">
-          <span class="pill">REST SDKs</span>
-          <span class="pill">Postman collections</span>
-          <span class="pill">OpenAPI specs</span>
-          <span class="pill">Sandbox keys</span>
-        </div>
-        {{- if .Service }}
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
-        {{- end }}
-      </article>
-      <article class="card">
-        <h3>Platform tools</h3>
-        <p>Operational tooling for access, cost, and environment management.</p>
-        <div class="pills">
-          <span class="pill">Identity &amp; access</span>
-          <span class="pill">Cost management</span>
-          <span class="pill">Environments</span>
-          <span class="pill">Usage dashboards</span>
-        </div>
-        {{- if .Service }}
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
-        {{- end }}
-      </article>
-      <article class="card">
-        <h3>Platform policies</h3>
-        <p>Agreements and operating procedures for production workloads.</p>
-        <div class="pills">
-          <span class="pill">Service level agreement</span>
-          <span class="pill">Incident management</span>
-          <span class="pill">Data residency</span>
-          <span class="pill">Security</span>
-        </div>
-        {{- if .Service }}
-        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
-        {{- end }}
-      </article>
-    </div>
-  </div>
-</section>
 
 <section class="whats-new">
   <div class="wrap">
@@ -179,7 +113,7 @@
           <li><a href="#">June 2026</a><time>Jun 2026</time></li>
           <li><a href="#">May 2026</a><time>May 2026</time></li>
         </ul>
-        <a class="see-all see-all-left" href="{{ if .Service }}{{ .Service.DefaultHref }}{{ else }}#{{ end }}">See all <span aria-hidden="true">↗</span></a>
+        <a class="see-all see-all-left" href="{{ if .Primary }}{{ .Primary.DefaultHref }}{{ else }}#documentation{{ end }}">See all <span aria-hidden="true">↗</span></a>
       </article>
       <article class="news-card">
         <h3>
@@ -198,7 +132,7 @@
           <li><a href="#">Webhook patterns for branch docs</a></li>
           <li><a href="#">Versioning APIs across services</a></li>
         </ul>
-        <a class="see-all see-all-left" href="{{ if .Service }}{{ .Service.DefaultHref }}{{ else }}#{{ end }}">See all <span aria-hidden="true">↗</span></a>
+        <a class="see-all see-all-left" href="{{ if .Primary }}{{ .Primary.DefaultHref }}{{ else }}#documentation{{ end }}">See all <span aria-hidden="true">↗</span></a>
       </article>
     </div>
   </div>
@@ -304,6 +238,6 @@
   </div>
 </footer>
 
-<script src="/assets/home/index.js"></script>
+<script src="/assets/home/index.js?v=search1"></script>
 </body>
 </html>

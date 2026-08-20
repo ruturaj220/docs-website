@@ -43,6 +43,11 @@ type Config struct {
 type Builder struct {
 	cfg Config
 	mu  sync.Mutex
+
+	// Parsed MkDocs search indexes, one shard per published version, reloaded
+	// when a build rewrites the file. Guarded by searchMu.
+	searchMu     sync.Mutex
+	searchShards map[string]*searchShard
 }
 
 func New(cfg Config) *Builder {

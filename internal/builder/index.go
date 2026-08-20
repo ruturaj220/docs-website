@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,20 +25,25 @@ type indexVersion struct {
 }
 
 type indexService struct {
-	Service     string
-	DisplayName string
-	Description string
-	Search      string
-	SeeAllHref  string
-	DefaultHref string
-	DefaultName string
-	Protected   []indexVersion
-	Recent      []indexVersion
+	Service      string
+	DisplayName  string
+	Description  string
+	SeeAllHref   string
+	DefaultHref  string
+	DefaultName  string
+	VersionLabel string
+	Protected    []indexVersion
+	Recent       []indexVersion
 }
 
 type indexData struct {
-	Year    int
-	Service *indexService // POC homepage: one live service card
+	Year int
+	// Services is every published service, one card each. Regenerated after
+	// every build, so a newly pushed service appears without a restart.
+	Services []indexService
+	// Primary is the first published service, for the incidental links that
+	// sit outside the service grid.
+	Primary *indexService
 }
 
 type servicePageData struct {
@@ -61,10 +67,9 @@ func (b *Builder) writeRootIndex() error {
 		return err
 	}
 
-	home := indexData{Year: year}
+	home := indexData{Year: year, Services: services}
 	if len(services) > 0 {
-		svc := services[0]
-		home.Service = &svc
+		home.Primary = &services[0]
 	}
 	if err := writeTemplate(filepath.Join(b.cfg.SiteDir, "index.html"), rootIndexTmpl, home); err != nil {
 		return err
@@ -96,8 +101,6 @@ func collectIndexServices(lists []VersionList) []indexService {
 			Description: "Technical documentation for " + display + ", published from this service's docs folder.",
 			SeeAllHref:  "/" + vl.Service + "/",
 		}
-		searchParts := []string{vl.Service, display}
-
 		for _, v := range vl.Versions {
 			iv := indexVersion{
 				Service:     vl.Service,
@@ -106,14 +109,17 @@ func collectIndexServices(lists []VersionList) []indexService {
 				Href:        "/" + vl.Service + "/" + v.Name + "/",
 				When:        v.BuiltAt.UTC().Format("2 Jan 2006"),
 			}
-			searchParts = append(searchParts, v.Name)
 			if v.Protected {
 				svc.Protected = append(svc.Protected, iv)
 			} else {
 				svc.Recent = append(svc.Recent, iv)
 			}
 		}
-		svc.Search = strings.ToLower(strings.Join(searchParts, " "))
+		if n := len(svc.Protected) + len(svc.Recent); n == 1 {
+			svc.VersionLabel = "1 version"
+		} else {
+			svc.VersionLabel = strconv.Itoa(n) + " versions"
+		}
 
 		if len(svc.Protected) > 0 {
 			svc.DefaultHref = svc.Protected[0].Href
