@@ -13,13 +13,13 @@ theme:
   favicon: assets/img/mojro-logo.png
   palette:
     - media: '(prefers-color-scheme: light)'
-      primary: indigo
+      primary: custom
       scheme: default
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - media: '(prefers-color-scheme: dark)'
-      primary: indigo
+      primary: custom
       scheme: slate
       toggle:
         icon: material/brightness-4
@@ -60,4 +60,5 @@ extra_javascript:
   - assets/js/version-selector.js
 
 extra_css:
+  - assets/css/theme.css
   - assets/css/version-selector.css

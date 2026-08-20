@@ -8,10 +8,17 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/mojro/docs-platform/internal/builder"
+)
+
+// How many search hits one request may return.
+const (
+	defaultSearchLimit = 20
+	maxSearchLimit     = 50
 )
 
 // Config controls which pushes are allowed to publish.
@@ -49,6 +56,7 @@ func (h *Handler) Routes() http.Handler {
 	mux.HandleFunc("/healthz", h.healthz)
 	mux.HandleFunc("/readyz", h.readyz)
 	mux.HandleFunc("/api/services", h.services)
+	mux.HandleFunc("/api/search", h.search)
 	mux.HandleFunc("/webhook/{service}", h.webhook)
 	mux.Handle("/", h.site())
 	return mux
@@ -72,6 +80,23 @@ func (h *Handler) readyz(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, h.b.Services())
+}
+
+// search backs the landing-page search box: GET /api/search?q=…&limit=…
+func (h *Handler) search(w http.ResponseWriter, r *http.Request) {
+	limit := defaultSearchLimit
+	if v := r.URL.Query().Get("limit"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			limit = n
+		}
+	}
+	if limit > maxSearchLimit {
+		limit = maxSearchLimit
+	}
+	// Results change with every build; a stale cached response would show
+	// pages that no longer exist.
+	w.Header().Set("Cache-Control", "no-store")
+	writeJSON(w, http.StatusOK, h.b.Search(r.URL.Query().Get("q"), limit))
 }
 
 // site serves the rendered static HTML directly — no nginx sidecar needed.

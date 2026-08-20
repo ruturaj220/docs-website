@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -222,4 +223,215 @@ func TestWriteIndexPageFallsBackWhenCommonMissing(t *testing.T) {
 	if !strings.Contains(string(out), "[Guide](guide.md)") {
 		t.Errorf("minimal index missing page link:\n%s", out)
 	}
+}
+
+func TestWriteRootIndexRendersLandingPage(t *testing.T) {
+	site := t.TempDir()
+	meta := t.TempDir()
+	vl := VersionList{
+		Service: "sample-api",
+		Versions: []Version{
+			{Name: "main", Protected: true, BuiltAt: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)},
+			{Name: "feature/x", Protected: false, BuiltAt: time.Date(2026, 8, 10, 0, 0, 0, 0, time.UTC)},
+		},
+	}
+	raw, err := json.Marshal(vl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(meta, "sample-api.json"), raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+
+	html, err := os.ReadFile(filepath.Join(site, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(html)
+	for _, want := range []string{
+		"Mojro documentation",
+		"Sample API",
+		"/sample-api/main/",
+		"2 versions",
+		"What’s new",
+		"Videos",
+		"/assets/img/mojro-wordmark.png",
+	} {
+		if !strings.Contains(s, want) {
+			t.Errorf("index.html missing %q", want)
+		}
+	}
+
+	// The card grid is built from published services only — no placeholder cards.
+	for _, gone := range []string{
+		"Planning &amp; optimization",
+		"Execution &amp; visibility",
+		"Development enablers",
+		"Platform tools",
+		"Platform policies",
+	} {
+		if strings.Contains(s, gone) {
+			t.Errorf("index.html still carries the placeholder card %q", gone)
+		}
+	}
+
+	// The service title links to the default version; See all opens the overview.
+	if !strings.Contains(s, `href="/sample-api/main/"`) {
+		t.Errorf("default version link missing")
+	}
+	if !strings.Contains(s, `href="/sample-api/"`) {
+		t.Errorf("see-all overview link missing")
+	}
+
+	svcHTML, err := os.ReadFile(filepath.Join(site, "sample-api", "index.html"))
+	if err != nil {
+		t.Fatalf("service overview page missing: %v", err)
+	}
+	ss := string(svcHTML)
+	for _, want := range []string{
+		"Sample API",
+		"/sample-api/main/",
+		"/sample-api/feature/x/",
+		"Developer Guide",
+		"Versions",
+	} {
+		if !strings.Contains(ss, want) {
+			t.Errorf("service page missing %q", want)
+		}
+	}
+
+	for _, path := range []string{
+		"assets/home/index.css",
+		"assets/home/index.js",
+		"assets/home/service.css",
+		"assets/img/mojro-wordmark.png",
+		"assets/img/mojro-logo.png",
+	} {
+		if _, err := os.Stat(filepath.Join(site, path)); err != nil {
+			t.Errorf("expected asset %s: %v", path, err)
+		}
+	}
+}
+
+func TestDisplayName(t *testing.T) {
+	cases := map[string]string{
+		"shipper-api":  "Shipper API",
+		"mojro-common": "Mojro Common",
+		"auth-sdk":     "Auth SDK",
+	}
+	for in, want := range cases {
+		if got := displayName(in); got != want {
+			t.Errorf("displayName(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+// writeMeta publishes a service manifest, as a build would.
+func writeMeta(t *testing.T, metaDir, service string, versions []Version) {
+	t.Helper()
+	raw, err := json.Marshal(VersionList{Service: service, Versions: versions})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(metaDir, service+".json"), raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRootIndexRendersEveryService(t *testing.T) {
+	site, meta := t.TempDir(), t.TempDir()
+	built := time.Date(2026, 8, 20, 0, 0, 0, 0, time.UTC)
+
+	writeMeta(t, meta, "mojro-common", []Version{{Name: "develop", Protected: true, BuiltAt: built}})
+	writeMeta(t, meta, "trip-location-processor", []Version{{Name: "develop", Protected: true, BuiltAt: built}})
+
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+	html := readIndex(t, site)
+
+	// Both services get their own card, not just the first one.
+	for _, want := range []string{
+		"Mojro Common", "/mojro-common/develop/", `href="/mojro-common/"`,
+		"Trip Location Processor", "/trip-location-processor/develop/", `href="/trip-location-processor/"`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("index.html missing %q", want)
+		}
+	}
+	if n := strings.Count(html, `class="card card-live"`); n != 2 {
+		t.Errorf("got %d service cards, want 2", n)
+	}
+}
+
+func TestRootIndexPicksUpANewService(t *testing.T) {
+	site, meta := t.TempDir(), t.TempDir()
+	built := time.Date(2026, 8, 20, 0, 0, 0, 0, time.UTC)
+
+	writeMeta(t, meta, "mojro-common", []Version{{Name: "develop", Protected: true, BuiltAt: built}})
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if html := readIndex(t, site); strings.Contains(html, "Trip Location Processor") {
+		t.Fatal("service present before it was published")
+	}
+
+	// A push publishes a second service; Build() ends in writeRootIndex().
+	writeMeta(t, meta, "trip-location-processor", []Version{{Name: "develop", Protected: true, BuiltAt: built}})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+
+	html := readIndex(t, site)
+	if !strings.Contains(html, "Trip Location Processor") {
+		t.Error("newly published service did not appear on the landing page")
+	}
+	if n := strings.Count(html, `class="card card-live"`); n != 2 {
+		t.Errorf("got %d service cards, want 2", n)
+	}
+}
+
+func TestRootIndexWithNoServices(t *testing.T) {
+	site, meta := t.TempDir(), t.TempDir()
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+	html := readIndex(t, site)
+	if !strings.Contains(html, "No services published yet") {
+		t.Error("expected an empty state when nothing is published")
+	}
+	if strings.Contains(html, `class="card card-live"`) {
+		t.Error("rendered a service card with no services")
+	}
+}
+
+func TestRootIndexVersionLabel(t *testing.T) {
+	site, meta := t.TempDir(), t.TempDir()
+	built := time.Date(2026, 8, 20, 0, 0, 0, 0, time.UTC)
+	writeMeta(t, meta, "one-api", []Version{{Name: "main", Protected: true, BuiltAt: built}})
+
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+	if html := readIndex(t, site); !strings.Contains(html, "1 version<") {
+		t.Error(`expected the singular "1 version" label`)
+	}
+}
+
+func readIndex(t *testing.T, site string) string {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(site, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(raw)
 }
