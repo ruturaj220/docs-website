@@ -183,6 +183,7 @@ func writeSelectorAssets(docsDir string) error {
 	files := map[string][]byte{
 		"assets/js/version-selector.js":   assets.VersionSelectorJS,
 		"assets/css/version-selector.css": assets.VersionSelectorCSS,
+		"assets/css/theme.css":            assets.ThemeCSS,
 		"assets/img/mojro-logo.png":       assets.Logo,
 	}
 	for dest, data := range files {

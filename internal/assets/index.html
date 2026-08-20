@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mojro documentation</title>
+<meta name="description" content="Find answers to your product and technical questions.">
+<link rel="icon" href="/assets/img/mojro-logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Maitree:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/home/index.css">
+</head>
+<body>
+<a class="skip" href="#documentation">Skip to documentation</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
+      <span class="brand-docs">Documentation</span>
+    </a>
+    <nav class="header-actions" aria-label="Site">
+      <button class="icon-btn" id="search-open" type="button" aria-label="Search documentation">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="btn-solid" href="#documentation">Ask AI</a>
+      <a class="btn-outline" href="https://www.mojro.com/contact">Contact us</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="banner">
+      <span class="banner-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M12 4.5 19 8v4.8c0 3.8-2.8 6.7-7 7.7-4.2-1-7-3.9-7-7.7V8l7-3.5Z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 12h4M12 10v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <p>New: generate executable logistics plans with Mojro PlanWyse APIs — docs for every service live here.</p>
+      <a href="#documentation">View documentation <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="hero-copy">
+      <h1>Mojro documentation</h1>
+      <p class="lede">Find answers to your product and technical questions.</p>
+    </div>
+    <label class="search" for="q">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <input id="q" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+      <kbd id="search-kbd">⌘ K</kbd>
+    </label>
+  </div>
+</section>
+
+<main id="documentation" class="docs">
+  <div class="wrap">
+    <h2>Documentation</h2>
+    <div class="card-grid" id="card-grid">
+      {{- if .Service }}
+      <!-- Live service — See all opens /{{ .Service.Service }}/{{ .Service.DefaultName }}/ -->
+      <article class="card card-live" data-card data-q="{{ .Service.Search }}">
+        <p class="card-eyebrow">Live service</p>
+        <h3><a href="{{ .Service.DefaultHref }}">{{ .Service.DisplayName }}</a></h3>
+        <p>{{ .Service.Description }}</p>
+        <div class="pills">
+          {{- range .Service.Protected }}
+          <a class="pill pill-stable" href="{{ .Href }}">{{ .Name }}</a>
+          {{- end }}
+          {{- range .Service.Recent }}
+          <a class="pill" href="{{ .Href }}">{{ .Name }}</a>
+          {{- end }}
+        </div>
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+      </article>
+      {{- end }}
+      <article class="card" data-card data-q="planning optimization planwyse route schedule load">
+        <h3>Planning &amp; optimization</h3>
+        <p>Build executable plans that resolve route, schedule, load, weight, and time together.</p>
+        <div class="pills">
+          <span class="pill">PlanWyse API</span>
+          <span class="pill">Constraints</span>
+          <span class="pill">What-if planning</span>
+          <span class="pill">Fleet capacity</span>
+        </div>
+        {{- if .Service }}
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        {{- end }}
+      </article>
+      <article class="card" data-card data-q="execution tracking epod visibility executewyse">
+        <h3>Execution &amp; visibility</h3>
+        <p>Track dispatches, capture ePOD, and feed execution signals back into the next plan.</p>
+        <div class="pills">
+          <span class="pill">ExecuteWyse API</span>
+          <span class="pill">Live ETA</span>
+          <span class="pill">ePOD</span>
+          <span class="pill">Exceptions</span>
+        </div>
+        {{- if .Service }}
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        {{- end }}
+      </article>
+    </div>
+    <p class="empty" id="no-results" hidden>No topics match that search.</p>
+  </div>
+</main>
+
+<section class="resources">
+  <div class="wrap">
+    <div class="card-grid">
+      <article class="card">
+        <h3>Development enablers</h3>
+        <p>SDKs, samples, and tools that help you integrate Mojro APIs faster.</p>
+        <div class="pills">
+          <span class="pill">REST SDKs</span>
+          <span class="pill">Postman collections</span>
+          <span class="pill">OpenAPI specs</span>
+          <span class="pill">Sandbox keys</span>
+        </div>
+        {{- if .Service }}
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        {{- end }}
+      </article>
+      <article class="card">
+        <h3>Platform tools</h3>
+        <p>Operational tooling for access, cost, and environment management.</p>
+        <div class="pills">
+          <span class="pill">Identity &amp; access</span>
+          <span class="pill">Cost management</span>
+          <span class="pill">Environments</span>
+          <span class="pill">Usage dashboards</span>
+        </div>
+        {{- if .Service }}
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        {{- end }}
+      </article>
+      <article class="card">
+        <h3>Platform policies</h3>
+        <p>Agreements and operating procedures for production workloads.</p>
+        <div class="pills">
+          <span class="pill">Service level agreement</span>
+          <span class="pill">Incident management</span>
+          <span class="pill">Data residency</span>
+          <span class="pill">Security</span>
+        </div>
+        {{- if .Service }}
+        <a class="see-all" href="{{ .Service.DefaultHref }}">See all <span aria-hidden="true">→</span></a>
+        {{- end }}
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="whats-new">
+  <div class="wrap">
+    <h2>What’s new</h2>
+    <div class="news-grid">
+      <article class="news-card">
+        <h3>
+          <span class="news-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M6 4.5h9.5L18.5 8v11.5H6V4.5Z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8.5 12h7M8.5 15.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          Platform release notes
+        </h3>
+        <p>Monthly summaries of API and platform changes.</p>
+        <ul>
+          <li><a href="#">August 2026</a><time>Aug 2026</time></li>
+          <li><a href="#">July 2026</a><time>Jul 2026</time></li>
+          <li><a href="#">June 2026</a><time>Jun 2026</time></li>
+          <li><a href="#">May 2026</a><time>May 2026</time></li>
+        </ul>
+        <a class="see-all see-all-left" href="{{ if .Service }}{{ .Service.DefaultHref }}{{ else }}#{{ end }}">See all <span aria-hidden="true">↗</span></a>
+      </article>
+      <article class="news-card">
+        <h3>
+          <span class="news-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M5 8.5h14v10H5V8.5Z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 8.5V7a4 4 0 0 1 8 0v1.5" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          Developer blog posts
+        </h3>
+        <p>Guides and deep-dives from the Mojro platform team.</p>
+        <ul>
+          <li><a href="#">Simultaneous multi-constraint planning</a></li>
+          <li><a href="#">Feeding ePOD signals back into PlanWyse</a></li>
+          <li><a href="#">Webhook patterns for branch docs</a></li>
+          <li><a href="#">Versioning APIs across services</a></li>
+        </ul>
+        <a class="see-all see-all-left" href="{{ if .Service }}{{ .Service.DefaultHref }}{{ else }}#{{ end }}">See all <span aria-hidden="true">↗</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="videos">
+  <div class="wrap">
+    <h2>Videos</h2>
+    <div class="video-track-wrap">
+      <div class="video-row" id="video-row">
+        <article class="video-card">
+          <button type="button" class="video-thumb" data-drive-id="1x6SSmT5NEoE-BJHhXDM9BLDaYzlqNEZd" aria-label="Play Beta testing flow">
+            <img src="https://drive.google.com/thumbnail?id=1x6SSmT5NEoE-BJHhXDM9BLDaYzlqNEZd&amp;sz=w1000" alt="" loading="lazy">
+            <span class="play" aria-hidden="true">▶</span>
+          </button>
+          <p>Beta testing flow</p>
+        </article>
+        <article class="video-card">
+          <button type="button" class="video-thumb" data-drive-id="1DhB-0TInvlDogpTkUbn80OgNRSrcsUfx" aria-label="Play HERE Maps navigation demo">
+            <img src="https://drive.google.com/thumbnail?id=1DhB-0TInvlDogpTkUbn80OgNRSrcsUfx&amp;sz=w1000" alt="" loading="lazy">
+            <span class="play" aria-hidden="true">▶</span>
+          </button>
+          <p>HERE Maps navigation demo</p>
+        </article>
+        <article class="video-card">
+          <button type="button" class="video-thumb" data-drive-id="102F-nlb7LErGtTpmIqNcItW4FJGg2ytu" aria-label="Play Partner app dynamic distribution">
+            <img src="https://drive.google.com/thumbnail?id=102F-nlb7LErGtTpmIqNcItW4FJGg2ytu&amp;sz=w1000" alt="" loading="lazy">
+            <span class="play" aria-hidden="true">▶</span>
+          </button>
+          <p>Partner app dynamic distribution</p>
+        </article>
+        <article class="video-card">
+          <button type="button" class="video-thumb" data-drive-id="1-vhPUQhM0ElhyTrD3X5kfPrODmD8kXOV" aria-label="Play TestFlight app installation flow">
+            <img src="https://drive.google.com/thumbnail?id=1-vhPUQhM0ElhyTrD3X5kfPrODmD8kXOV&amp;sz=w1000" alt="" loading="lazy">
+            <span class="play" aria-hidden="true">▶</span>
+          </button>
+          <p>TestFlight app installation flow</p>
+        </article>
+      </div>
+    </div>
+    <div class="video-nav">
+      <button type="button" class="dot-btn" id="video-prev" aria-label="Previous videos">‹</button>
+      <span class="dots" id="video-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></span>
+      <button type="button" class="dot-btn" id="video-next" aria-label="Next videos">›</button>
+    </div>
+  </div>
+</section>
+
+<dialog class="video-modal" id="video-modal">
+  <form method="dialog" class="video-modal-bar">
+    <button type="submit" class="video-modal-close" aria-label="Close video">Close</button>
+  </form>
+  <iframe id="video-frame" title="Video player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</dialog>
+
+<footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="footer-brand">
+      <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
+    </div>
+    <div class="footer-col">
+      <h2>Other sites</h2>
+      <ul>
+        <li><a href="https://www.mojro.com">mojro.com</a></li>
+        <li><a href="https://www.mojro.com/contact">Contact</a></li>
+        <li><a href="https://www.mojro.com">Platform</a></li>
+        <li><a href="https://www.mojro.com">Resources</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <p>© {{ .Year }} Mojro</p>
+    <nav aria-label="Legal">
+      <a href="https://www.mojro.com/contact">Contact us</a>
+      <a href="https://www.mojro.com">Privacy</a>
+      <a href="https://www.mojro.com">Terms</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/assets/home/index.js"></script>
+</body>
+</html>

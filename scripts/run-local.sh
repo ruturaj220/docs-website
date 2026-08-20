@@ -8,6 +8,11 @@ set -euo pipefail
 
 PROJ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Prefer the project venv so `pip`/`mkdocs` work on macOS (Homebrew has pip3, not pip).
+if [[ -x "$PROJ/.venv/bin/mkdocs" ]]; then
+  export PATH="$PROJ/.venv/bin:$PATH"
+fi
+
 export DATA_DIR="${DATA_DIR:-$PROJ/.local-data}"
 export LISTEN_ADDR="${LISTEN_ADDR:-:8080}"
 export WEBHOOK_SECRET="${WEBHOOK_SECRET:-dev-secret}"
@@ -19,7 +24,13 @@ export MAX_VERSIONS="${MAX_VERSIONS:-5}"
 export PUBLISH_FEATURE_BRANCHES="${PUBLISH_FEATURE_BRANCHES:-true}"
 
 if ! command -v mkdocs >/dev/null 2>&1; then
-  echo "mkdocs not found on PATH. Run: pip install -r requirements.txt" >&2
+  echo "mkdocs not found on PATH. Create a venv and install deps:" >&2
+  echo "  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt" >&2
+  exit 1
+fi
+
+if ! command -v go >/dev/null 2>&1; then
+  echo "go not found on PATH. Install Go (e.g. brew install go)." >&2
   exit 1
 fi
 

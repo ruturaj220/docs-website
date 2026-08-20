@@ -4,137 +4,174 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/mojro/docs-platform/internal/assets"
 )
 
-// rootIndexTmpl is the landing page at /. It links each service to its
-// protected branches first, then its recent ones.
-var rootIndexTmpl = template.Must(template.New("index").Parse(`<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mojro Docs</title>
-<style>
-  :root { color-scheme: light dark; }
-  body {
-    margin: 0; padding: 3rem 1.5rem;
-    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: #fafafa; color: #18181b;
-  }
-  main { max-width: 52rem; margin: 0 auto; }
-  h1 { font-size: 1.75rem; margin: 0 0 .25rem; }
-  .sub { color: #71717a; margin: 0 0 2.5rem; }
-  .svc {
-    background: #fff; border: 1px solid #e4e4e7; border-radius: .5rem;
-    padding: 1rem 1.25rem; margin-bottom: .75rem;
-  }
-  .svc h2 { font-size: 1.05rem; margin: 0 0 .6rem; }
-  .svc h2 a { color: #4f46e5; text-decoration: none; }
-  .svc h2 a:hover { text-decoration: underline; }
-  .row { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
-  .row + .row { margin-top: .4rem; }
-  .lbl {
-    font-size: .65rem; text-transform: uppercase; letter-spacing: .04em;
-    color: #a1a1aa; margin-right: .25rem; min-width: 4.5rem;
-  }
-  a.v {
-    font-size: .8rem; text-decoration: none; padding: .15rem .45rem;
-    border-radius: .25rem; background: #f4f4f5; color: #3f3f46;
-    border: 1px solid #e4e4e7; word-break: break-all;
-  }
-  a.v:hover { background: #e4e4e7; }
-  a.v.prot { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; font-weight: 600; }
-  .empty { color: #71717a; }
-  @media (prefers-color-scheme: dark) {
-    body { background: #09090b; color: #f4f4f5; }
-    .svc { background: #18181b; border-color: #27272a; }
-    a.v { background: #27272a; border-color: #3f3f46; color: #d4d4d8; }
-    a.v:hover { background: #3f3f46; }
-    a.v.prot { background: #312e81; border-color: #4338ca; color: #e0e7ff; }
-    .svc h2 a { color: #a5b4fc; }
-  }
-</style>
-</head>
-<body>
-<main>
-  <h1>Mojro Docs</h1>
-  <p class="sub">Documentation for all Mojro API services, published from each repo's <code>docs/</code> folder.</p>
-  {{- if not .Services }}
-  <p class="empty">No documentation published yet.</p>
-  {{- end }}
-  {{- range .Services }}
-  <div class="svc">
-    <h2><a href="/{{ .Service }}/{{ .Default }}/">{{ .Service }}</a></h2>
-    {{- if .Protected }}
-    <div class="row">
-      <span class="lbl">Branches</span>
-      {{- range .Protected }}
-      <a class="v prot" href="/{{ .Service }}/{{ .Name }}/">{{ .Name }}</a>
-      {{- end }}
-    </div>
-    {{- end }}
-    {{- if .Recent }}
-    <div class="row">
-      <span class="lbl">Recent</span>
-      {{- range .Recent }}
-      <a class="v" href="/{{ .Service }}/{{ .Name }}/">{{ .Name }}</a>
-      {{- end }}
-    </div>
-    {{- end }}
-  </div>
-  {{- end }}
-</main>
-</body>
-</html>
-`))
+var (
+	rootIndexTmpl = template.Must(template.New("index").Parse(string(assets.IndexHTML)))
+	serviceTmpl   = template.Must(template.New("service").Parse(string(assets.ServiceHTML)))
+)
 
 type indexVersion struct {
-	Service string
-	Name    string
+	Service     string
+	DisplayName string
+	Name        string
+	Href        string
+	When        string
 }
 
 type indexService struct {
-	Service   string
-	Default   string
-	Protected []indexVersion
-	Recent    []indexVersion
+	Service     string
+	DisplayName string
+	Description string
+	Search      string
+	SeeAllHref  string
+	DefaultHref string
+	DefaultName string
+	Protected   []indexVersion
+	Recent      []indexVersion
 }
 
 type indexData struct {
-	Services []indexService
+	Year    int
+	Service *indexService // POC homepage: one live service card
 }
 
-// writeRootIndex regenerates the landing page from the version manifests.
+type servicePageData struct {
+	Year    int
+	Service indexService
+}
+
+// WriteRootIndex regenerates the home page, service overview pages, and assets.
+func (b *Builder) WriteRootIndex() error {
+	return b.writeRootIndex()
+}
+
 func (b *Builder) writeRootIndex() error {
-	var data indexData
-	for _, vl := range b.Services() {
-		svc := indexService{Service: vl.Service}
+	year := time.Now().UTC().Year()
+	services := collectIndexServices(b.Services())
+
+	if err := os.MkdirAll(b.cfg.SiteDir, 0o755); err != nil {
+		return err
+	}
+	if err := writeRootAssets(b.cfg.SiteDir); err != nil {
+		return err
+	}
+
+	home := indexData{Year: year}
+	if len(services) > 0 {
+		svc := services[0]
+		home.Service = &svc
+	}
+	if err := writeTemplate(filepath.Join(b.cfg.SiteDir, "index.html"), rootIndexTmpl, home); err != nil {
+		return err
+	}
+
+	// Real data for every published service at /<service>/ (See all target).
+	for _, svc := range services {
+		dir := filepath.Join(b.cfg.SiteDir, svc.Service)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+		if err := writeTemplate(filepath.Join(dir, "index.html"), serviceTmpl, servicePageData{
+			Year:    year,
+			Service: svc,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func collectIndexServices(lists []VersionList) []indexService {
+	out := make([]indexService, 0, len(lists))
+	for _, vl := range lists {
+		display := displayName(vl.Service)
+		svc := indexService{
+			Service:     vl.Service,
+			DisplayName: display,
+			Description: "Technical documentation for " + display + ", published from this service's docs folder.",
+			SeeAllHref:  "/" + vl.Service + "/",
+		}
+		searchParts := []string{vl.Service, display}
+
 		for _, v := range vl.Versions {
-			iv := indexVersion{Service: vl.Service, Name: v.Name}
+			iv := indexVersion{
+				Service:     vl.Service,
+				DisplayName: display,
+				Name:        v.Name,
+				Href:        "/" + vl.Service + "/" + v.Name + "/",
+				When:        v.BuiltAt.UTC().Format("2 Jan 2006"),
+			}
+			searchParts = append(searchParts, v.Name)
 			if v.Protected {
 				svc.Protected = append(svc.Protected, iv)
 			} else {
 				svc.Recent = append(svc.Recent, iv)
 			}
 		}
-		// Prefer a protected branch as the service's default landing target.
+		svc.Search = strings.ToLower(strings.Join(searchParts, " "))
+
 		if len(svc.Protected) > 0 {
-			svc.Default = svc.Protected[0].Name
+			svc.DefaultHref = svc.Protected[0].Href
+			svc.DefaultName = svc.Protected[0].Name
 		} else if len(svc.Recent) > 0 {
-			svc.Default = svc.Recent[0].Name
+			svc.DefaultHref = svc.Recent[0].Href
+			svc.DefaultName = svc.Recent[0].Name
 		} else {
 			continue
 		}
-		data.Services = append(data.Services, svc)
+		out = append(out, svc)
 	}
+	return out
+}
 
-	if err := os.MkdirAll(b.cfg.SiteDir, 0o755); err != nil {
-		return err
-	}
-	f, err := os.Create(filepath.Join(b.cfg.SiteDir, "index.html"))
+func writeTemplate(path string, tmpl *template.Template, data any) error {
+	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return rootIndexTmpl.Execute(f, data)
+	return tmpl.Execute(f, data)
+}
+
+func writeRootAssets(siteDir string) error {
+	files := map[string][]byte{
+		"assets/home/index.css":         assets.IndexCSS,
+		"assets/home/index.js":          assets.IndexJS,
+		"assets/home/service.css":       assets.ServiceCSS,
+		"assets/img/mojro-logo.png":     assets.Logo,
+		"assets/img/mojro-wordmark.png": assets.Wordmark,
+	}
+	for dest, body := range files {
+		full := filepath.Join(siteDir, dest)
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(full, body, 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func displayName(service string) string {
+	parts := strings.Split(service, "-")
+	for i, p := range parts {
+		switch strings.ToLower(p) {
+		case "api":
+			parts[i] = "API"
+		case "sdk":
+			parts[i] = "SDK"
+		default:
+			if p == "" {
+				continue
+			}
+			parts[i] = strings.ToUpper(p[:1]) + p[1:]
+		}
+	}
+	return strings.Join(parts, " ")
 }

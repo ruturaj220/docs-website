@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -221,5 +222,95 @@ func TestWriteIndexPageFallsBackWhenCommonMissing(t *testing.T) {
 	}
 	if !strings.Contains(string(out), "[Guide](guide.md)") {
 		t.Errorf("minimal index missing page link:\n%s", out)
+	}
+}
+
+func TestWriteRootIndexRendersLandingPage(t *testing.T) {
+	site := t.TempDir()
+	meta := t.TempDir()
+	vl := VersionList{
+		Service: "sample-api",
+		Versions: []Version{
+			{Name: "main", Protected: true, BuiltAt: time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)},
+			{Name: "feature/x", Protected: false, BuiltAt: time.Date(2026, 8, 10, 0, 0, 0, 0, time.UTC)},
+		},
+	}
+	raw, err := json.Marshal(vl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(meta, "sample-api.json"), raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	b := New(Config{SiteDir: site, MetaDir: meta})
+	if err := b.WriteRootIndex(); err != nil {
+		t.Fatal(err)
+	}
+
+	html, err := os.ReadFile(filepath.Join(site, "index.html"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(html)
+	for _, want := range []string{
+		"Mojro documentation",
+		"Sample API",
+		"/sample-api/main/",
+		"Planning &amp; optimization",
+		"What’s new",
+		"Videos",
+		"/assets/img/mojro-wordmark.png",
+	} {
+		if !strings.Contains(s, want) {
+			t.Errorf("index.html missing %q", want)
+		}
+	}
+
+	// See all must open the default version docs (original /service/branch/ target).
+	if !strings.Contains(s, `href="/sample-api/main/"`) {
+		t.Errorf("see-all / default docs link missing")
+	}
+
+	svcHTML, err := os.ReadFile(filepath.Join(site, "sample-api", "index.html"))
+	if err != nil {
+		t.Fatalf("service overview page missing: %v", err)
+	}
+	ss := string(svcHTML)
+	for _, want := range []string{
+		"Sample API",
+		"/sample-api/main/",
+		"/sample-api/feature/x/",
+		"Developer Guide",
+		"Versions",
+	} {
+		if !strings.Contains(ss, want) {
+			t.Errorf("service page missing %q", want)
+		}
+	}
+
+	for _, path := range []string{
+		"assets/home/index.css",
+		"assets/home/index.js",
+		"assets/home/service.css",
+		"assets/img/mojro-wordmark.png",
+		"assets/img/mojro-logo.png",
+	} {
+		if _, err := os.Stat(filepath.Join(site, path)); err != nil {
+			t.Errorf("expected asset %s: %v", path, err)
+		}
+	}
+}
+
+func TestDisplayName(t *testing.T) {
+	cases := map[string]string{
+		"shipper-api":  "Shipper API",
+		"mojro-common": "Mojro Common",
+		"auth-sdk":     "Auth SDK",
+	}
+	for in, want := range cases {
+		if got := displayName(in); got != want {
+			t.Errorf("displayName(%q) = %q, want %q", in, got, want)
+		}
 	}
 }

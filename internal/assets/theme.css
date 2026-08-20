@@ -1,0 +1,19 @@
+/* Mojro maroon on the default Material chrome — only the primary (header) palette. */
+:root,
+[data-md-color-scheme="default"],
+[data-md-color-primary="custom"],
+[data-md-color-primary="indigo"] {
+  --md-primary-fg-color: #3f1211 !important;
+  --md-primary-fg-color--light: #72010f !important;
+  --md-primary-fg-color--dark: #2a0a09 !important;
+  --md-primary-bg-color: #fffffb !important;
+  --md-primary-bg-color--light: #fffffbb3 !important;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #3f1211 !important;
+  --md-primary-fg-color--light: #72010f !important;
+  --md-primary-fg-color--dark: #1a0808 !important;
+  --md-primary-bg-color: #fffffb !important;
+  --md-primary-bg-color--light: #fffffbb3 !important;
+}

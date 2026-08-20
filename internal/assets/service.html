@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ .Service.DisplayName }} · Mojro documentation</title>
+<meta name="description" content="{{ .Service.Description }}">
+<link rel="icon" href="/assets/img/mojro-logo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Maitree:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/home/service.css">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
+      <span class="brand-docs">Documentation</span>
+    </a>
+    <div class="header-mid">
+      <span class="product-chip">{{ .Service.DisplayName }}</span>
+      {{- if .Service.DefaultName }}
+      <span class="version-chip">{{ .Service.DefaultName }}</span>
+      {{- end }}
+      <a href="#content">Guides</a>
+      <a href="{{ .Service.DefaultHref }}">API Reference</a>
+    </div>
+    <nav class="header-actions" aria-label="Site">
+      <a class="btn-solid" href="#content">Ask AI</a>
+      <a class="btn-outline" href="https://www.mojro.com/contact">Contact us</a>
+    </nav>
+  </div>
+</header>
+
+<div class="doc-shell">
+  <aside class="sidebar" aria-label="Guide navigation">
+    <button type="button" class="sidebar-title" aria-expanded="true">
+      <span>{{ .Service.DisplayName }} Developer Guide</span>
+      <span class="chev" aria-hidden="true">⌃</span>
+    </button>
+    <nav class="side-nav">
+      <a class="side-link is-active" href="#content">Introduction</a>
+      <a class="side-link" href="#versions">Versions</a>
+      {{- range .Service.Protected }}
+      <a class="side-link side-sub" href="{{ .Href }}">{{ .Name }}</a>
+      {{- end }}
+      {{- range .Service.Recent }}
+      <a class="side-link side-sub" href="{{ .Href }}">{{ .Name }}</a>
+      {{- end }}
+      <details class="side-group">
+        <summary>Getting started</summary>
+        <a class="side-link side-sub" href="{{ .Service.DefaultHref }}">Open default version</a>
+      </details>
+      <details class="side-group">
+        <summary>Standard API elements</summary>
+        <a class="side-link side-sub" href="{{ .Service.DefaultHref }}">Browse docs</a>
+      </details>
+    </nav>
+  </aside>
+
+  <main id="content" class="content">
+    <p class="eyebrow">{{ .Service.DisplayName }} · DEVELOPER GUIDE</p>
+    <h1>Introduction</h1>
+    <p class="lede">
+      Documentation for <strong>{{ .Service.Service }}</strong>, published automatically from this
+      service repo’s <code>docs/</code> folder. Pick a published branch to open its rendered docs
+      at <code>/{{ .Service.Service }}/&lt;branch&gt;/</code>.
+    </p>
+
+    <aside class="note" role="note">
+      <span class="note-icon" aria-hidden="true">i</span>
+      <div>
+        <strong>Note</strong>
+        <p>{{ .Service.Description }} Protected branches stay published; feature branches follow retention.</p>
+      </div>
+    </aside>
+
+    <h2 id="versions">Versions</h2>
+    <p>Each link opens that branch’s documentation site — the same targets as the original version chips.</p>
+
+    {{- if .Service.Protected }}
+    <h3>Branches</h3>
+    <div class="version-list">
+      {{- range .Service.Protected }}
+      <a class="version-pill is-stable" href="{{ .Href }}">{{ .Name }}</a>
+      {{- end }}
+    </div>
+    {{- end }}
+
+    {{- if .Service.Recent }}
+    <h3>Recent</h3>
+    <div class="version-list">
+      {{- range .Service.Recent }}
+      <a class="version-pill" href="{{ .Href }}">{{ .Name }}</a>
+      {{- end }}
+    </div>
+    {{- end }}
+
+    {{- if and (not .Service.Protected) (not .Service.Recent) }}
+    <p class="empty">No versions published yet.</p>
+    {{- end }}
+
+    <p class="updated"><span aria-hidden="true">⏱</span> Updated from the latest webhook build</p>
+
+    <div class="content-nav">
+      {{- if .Service.DefaultHref }}
+      <a class="next" href="{{ .Service.DefaultHref }}">Get started with {{ .Service.DisplayName }} <span aria-hidden="true">→</span></a>
+      {{- end }}
+    </div>
+
+    <div class="feedback">
+      <p>Did this page help you?</p>
+      <button type="button">👍 Yes</button>
+      <button type="button">👎 No</button>
+    </div>
+  </main>
+
+  <aside class="toc" aria-label="On this page">
+    <p class="toc-label">On this page</p>
+    <a href="#content">Introduction</a>
+    <a class="is-active" href="#versions">Versions</a>
+  </aside>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="footer-brand">
+      <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
+    </div>
+    <div class="footer-col">
+      <h2>Other sites</h2>
+      <ul>
+        <li><a href="https://www.mojro.com">mojro.com</a></li>
+        <li><a href="https://www.mojro.com/contact">Contact</a></li>
+        <li><a href="/">All documentation</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <p>© {{ .Year }} Mojro</p>
+    <nav aria-label="Legal">
+      <a href="https://www.mojro.com/contact">Contact us</a>
+      <a href="https://www.mojro.com">Privacy</a>
+      <a href="https://www.mojro.com">Terms</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

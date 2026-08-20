@@ -79,6 +79,12 @@ func main() {
 		MaxVersions:   maxVersions,
 	})
 
+	// Always refresh the HERE-style landing page on boot so local/dev doesn't
+	// keep serving a stale index.html from a previous binary.
+	if err := b.WriteRootIndex(); err != nil {
+		log.Printf("write root index: %v", err)
+	}
+
 	h := handler.New(b, handler.Config{
 		Secret:                 secret,
 		SiteDir:                siteDir,
