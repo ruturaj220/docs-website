@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Maitree:wght@500;600;700&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/home/service.css">
+<link rel="stylesheet" href="/assets/home/service.css?v=footer2">
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
@@ -126,25 +126,52 @@
 </div>
 
 <footer class="site-footer">
-  <div class="wrap footer-top">
-    <div class="footer-brand">
-      <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
-    </div>
-    <div class="footer-col">
-      <h2>Other sites</h2>
-      <ul>
-        <li><a href="https://www.mojro.com">mojro.com</a></li>
-        <li><a href="https://www.mojro.com/contact">Contact</a></li>
-        <li><a href="/">All documentation</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="wrap footer-bottom">
-    <p>© {{ .Year }} Mojro</p>
-    <nav aria-label="Legal">
-      <a href="https://www.mojro.com/contact">Contact us</a>
-      <a href="https://www.mojro.com">Privacy</a>
-      <a href="https://www.mojro.com">Terms</a>
+  <div class="wrap">
+    <nav class="footer-nav" aria-label="Mojro sites">
+      <div class="footer-col">
+        <h2>Product</h2>
+        <ul>
+          <li><a href="https://www.mojro.com/planwyse">Planwyse</a></li>
+          <li><a href="https://www.mojro.com/executewyse">Executewyse</a></li>
+          <li><a href="https://www.mojro.com/planwyse-executewyse">Planwyse + Executewyse</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h2>Resources</h2>
+        <ul>
+          <li><a href="https://www.mojro.com/resources/video">Videos</a></li>
+          <li><a href="https://www.mojro.com/resources/news-press-release">News &amp; press releases</a></li>
+          <li><a href="https://www.mojro.com/resources/blog">Blogs</a></li>
+          <li><a href="https://www.mojro.com/resources/case-study">Case study</a></li>
+          <li><a href="https://www.mojro.com/resources/ebooks-newsletter">eBooks &amp; Newsletters</a></li>
+          <li><a href="https://www.mojro.com/resources/whitepaper">Whitepaper</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h2>Company</h2>
+        <ul>
+          <li><a href="https://www.mojro.com/about-us">About Us</a></li>
+          <li><a href="https://mojro.greythr.com/hire/jobs/">Career</a></li>
+          <li><a href="https://www.mojro.com/contact">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h2>Platform</h2>
+        <ul>
+          <li><a href="https://www.mojro.com/platform-capabilities">The Mojro Platform</a></li>
+          <li><a href="https://www.mojro.com/our-difference">Our Difference</a></li>
+          <li><a href="/">All documentation</a></li>
+        </ul>
+      </div>
+      <div class="footer-brand">
+        <img class="wordmark" src="/assets/img/mojro-wordmark.png" width="129" height="32" alt="Mojro">
+        <p class="footer-copy">© {{ .Year }} Mojro. All rights reserved.</p>
+        <a class="footer-email" href="mailto:info@mojro.com">info@mojro.com</a>
+        <div class="footer-legal">
+          <a href="https://www.mojro.com/terms-of-use">Terms of use</a>
+          <a href="https://www.mojro.com/privacy-policy">Privacy policy</a>
+        </div>
+      </div>
     </nav>
   </div>
 </footer>
