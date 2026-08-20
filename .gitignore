@@ -1,0 +1,5 @@
+/site/
+/bin/
+/.local-data/
+/.venv/
+__pycache__/

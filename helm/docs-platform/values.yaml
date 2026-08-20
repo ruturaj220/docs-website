@@ -1,0 +1,69 @@
+image:
+  repository: mojrodevops.azurecr.io/docs-platform
+  tag: "0.1.0"
+  pullPolicy: Always
+
+imagePullSecrets: []
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+webhook:
+  # Leave empty and set existingSecret instead to keep the token out of values.
+  secret: ""
+  existingSecret: ""
+  secretKey: webhook-secret
+  # Long-lived branches: always published, updated in place, never evicted.
+  protectedRefs: "main,master,develop"
+  # Publish non-protected branches (feature/*) as their own versions too.
+  # Set to false to restrict the site to protected branches only.
+  publishFeatureBranches: true
+  # How many non-protected versions to keep per service (newest first).
+  maxVersions: 5
+
+persistence:
+  enabled: true
+  # Azure Files (RWX) rather than Azure Disk: the built site lives here and
+  # RWX keeps the door open for >1 replica later. Set to managed-csi for a
+  # single-replica Azure Disk setup instead.
+  storageClass: azurefile-csi
+  accessMode: ReadWriteMany
+  size: 10Gi
+  existingClaim: ""
+
+# Envoy Gateway fronts this service; the chart emits an HTTPRoute rather than
+# an Ingress. The Gateway itself (mojro-gateway, gatewayClassName: eg) is
+# managed outside this chart and must already exist.
+gateway:
+  enabled: true
+  name: mojro-gateway
+  namespace: envoy-gateway-system
+  hostname: docs.mojro.com
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL

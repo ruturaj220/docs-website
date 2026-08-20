@@ -1,0 +1,63 @@
+# Shared theme/plugin config. Each service build generates a small mkdocs.yml
+# that pulls this in via `INHERIT:` and sets only site_name/docs_dir, so teams
+# never maintain mkdocs config in their own repos.
+#
+# strict is deliberately off: this builds docs for 20+ independent teams, and
+# one team's broken link should not fail their whole site.
+strict: false
+
+theme:
+  name: material
+  # Injected into every build by the builder, so service repos don't ship it.
+  logo: assets/img/mojro-logo.png
+  favicon: assets/img/mojro-logo.png
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      primary: indigo
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      primary: indigo
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    # Left sidebar: group pages into sections.
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    # Right sidebar: the "Table of contents" panel. toc.integrate is
+    # deliberately NOT set — that would fold the TOC into the left nav and
+    # remove the right-hand panel.
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search
+  - awesome-pages
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - admonition
+  - tables
+  # permalink adds the anchor links the right-hand TOC scrolls to.
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+extra_javascript:
+  - assets/js/version-selector.js
+
+extra_css:
+  - assets/css/version-selector.css

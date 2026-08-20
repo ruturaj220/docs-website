@@ -1,0 +1,6 @@
+apiVersion: v2
+name: docs-platform
+description: Combined MkDocs site for all Mojro API services, rebuilt from Bitbucket webhooks
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
