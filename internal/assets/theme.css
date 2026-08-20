@@ -1,19 +1,75 @@
-/* Mojro maroon on the default Material chrome — only the primary (header) palette. */
+/* Service docs: keep Material layout; header matches home (cream, not blue). */
+
 :root,
 [data-md-color-scheme="default"],
+[data-md-color-scheme="slate"],
 [data-md-color-primary="custom"],
 [data-md-color-primary="indigo"] {
-  --md-primary-fg-color: #3f1211 !important;
-  --md-primary-fg-color--light: #72010f !important;
-  --md-primary-fg-color--dark: #2a0a09 !important;
-  --md-primary-bg-color: #fffffb !important;
-  --md-primary-bg-color--light: #fffffbb3 !important;
+  --md-primary-fg-color: #3f1211;
+  --md-primary-fg-color--light: #72010f;
+  --md-primary-fg-color--dark: #130000;
+  --md-primary-bg-color: #fffffb;
+  --md-primary-bg-color--light: #fffffbb3;
+  --md-accent-fg-color: #b71824;
+  --md-typeset-a-color: #72010f;
 }
 
-[data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #3f1211 !important;
-  --md-primary-fg-color--light: #72010f !important;
-  --md-primary-fg-color--dark: #1a0808 !important;
-  --md-primary-bg-color: #fffffb !important;
-  --md-primary-bg-color--light: #fffffbb3 !important;
+/* Home-like sticky header */
+.md-header {
+  background: color-mix(in srgb, #fffffb 88%, transparent) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #3f1211 !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid color-mix(in srgb, #3f1211 14%, transparent);
+}
+
+.md-header__title,
+.md-header .md-header__button,
+.md-header .md-header__topic,
+.md-header__topic .md-ellipsis,
+.md-source__repository,
+.md-search__input,
+.md-search__input + .md-search__icon,
+.md-header__button svg {
+  color: #3f1211 !important;
+  fill: currentColor !important;
+}
+
+.md-header__button:hover {
+  background: #ebecdc !important;
+  border-radius: 999px;
+}
+
+.md-search__form {
+  background: #fffffb !important;
+  border: 1px solid color-mix(in srgb, #3f1211 16%, transparent);
+  border-radius: 999px;
+  box-shadow: none !important;
+}
+
+.md-search__input::placeholder {
+  color: #6b5858 !important;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.7rem;
+}
+
+/* Tabs under header (if enabled) stay cream */
+.md-tabs {
+  background: #f5f4ed !important;
+  color: #3f1211 !important;
+  border-bottom: 1px solid color-mix(in srgb, #3f1211 14%, transparent);
+}
+.md-tabs__link {
+  color: #3f1211 !important;
+  opacity: 0.85;
+}
+.md-tabs__link--active,
+.md-tabs__link:focus,
+.md-tabs__link:hover {
+  color: #72010f !important;
+  opacity: 1;
 }

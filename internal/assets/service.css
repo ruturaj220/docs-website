@@ -56,9 +56,14 @@ code {
   top: 0;
   z-index: 30;
   height: var(--header-h);
-  background: color-mix(in srgb, var(--beige) 92%, transparent);
+  background: color-mix(in srgb, var(--off-white) 88%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+}
+.site-header.is-scrolled {
+  border-bottom-color: var(--line);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 5%, transparent);
 }
 .header-inner {
   height: 100%;
